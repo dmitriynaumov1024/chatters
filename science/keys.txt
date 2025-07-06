@@ -1,0 +1,19 @@
+User Session
++ private key 
+    usually stored on client device only;
+    if this session is backed up - stored 
+    in database encrypted by backer's private key,
+    optionally encrypted with short recovery password,
+    password in not stored anywhere, to be remembered 
+    by human user.
++ public key
+    stored in database
+
+User info key
+    symmetric key, stored in database encrypted by session private key
+
+Chat info key
+    symmetric key, stored in database encrypted by session private key
+
+Chat sender key
+    symmetric key, stored in database encrypted by session private key

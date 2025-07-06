@@ -1,0 +1,15 @@
+Auth Logic
+
+- Q: 
+    How to use key pair to prove who i am?
+- A: 
+    Key pair is to be used on initial stage of auth, a.k.a "Log in"
+    1 - Server gives a reasonably long byte sequence to client
+    2 - Client encrypts byte sequence with session private key and sends it back to server
+    3 - Server verifies encrypted bytes with public key, if it matches then
+    4 - Server sends client a token made of user id, session id, refresh token, and signature of data mentioned above.
+    5 - When making requests, to identify self, client sends Authorization header with that token
+    6 - After an hour, client refreshes auth, sends to server a request with refresh token encrypted by session private key
+    7 - if all ok, server adds one hour (or more if necessary) to UserSession expiration time,
+    8 - server gives client a new token made of user id, session id, new refresh token and signature
+    

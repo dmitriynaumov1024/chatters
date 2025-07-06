@@ -1,0 +1,75 @@
+User
++ id: string uuid pk
++ username: string unique
++ email: string # encr. by VaultUserInfoKey.key 
++ name: string # encr. by VaultUserInfoKey.key
++ description: string # encr. by VaultUserInfoKey.key
+
+Chat
++ id: string uuid pk
++ ownerId: string uuid fk(User.id) # only owner can delete this chat
++ name: string # encr. by VaultChatInfoKey.key
++ description: string # encr. by VaultChatInfoKey.key
+
+UserInChat
++ id: string uuid pk
++ chatId: string uuid fk(Chat.id)
++ userId: string uuid fk(User.id)
++ canWrite: boolean
++ canManage: boolean
+
+ChatMessage
++ id: string uuid pk
++ chatId: string uuid fk(Chat.id)
++ senderId: string uuid fk(User.id)
++ keyId: string uuid # id of key that was used to encrypt this message
++ createdAt: number timestamp
++ data: string json # json encoded and then encrypted with sender key
++ data: {
+    deletedAt: number timestamp
+    editedAt: number timestamp
+    text: string
+    reply: {
+        messageId: string
+        senderId: string
+    }
+    attachments: {
+        type: "image" | "video" | "audio" | "file"
+        name: string
+        url: string
+    }[]
+}
+
+UserSession
++ id: string uuid pk
++ userId: string uuid fk(User.id)
++ createdAt: number timestamp
++ expiredAt: number timestamp
++ publicKey: string
+
+VaultUserInfoKey
++ id: string uuid pk
++ sessionId: string uuid fk(UserSession.id) # who can use this to decrypt
++ userId: string uuid fk(User.id) # id of user info who can be decrypted by this key
++ key: string # symmetric key; encr. by UserSession.publicKey; decr. by UserSession.privateKey
+
+VaultChatInfoKey
++ id: string uuid pk
++ sessionId: string uuid fk(UserSession.id) # who can use this to decrypt
++ chatId: string uuid fk(User.id) # id of chat info that can be decrypted by this key
++ key: string # symmetric key; encr. by UserSession.publicKey; decr. by UserSession.privateKey
+
+VaultChatSenderKey
++ id: string uuid pk
++ sessionId: string uuid fk(UserSession.id) # who can use this to decrypt (if session deleted, this deleted too)
++ chatId: string uuid fk(Chat.id) # where messages (if chat deleted, this deleted too)
++ senderSessionId: string uuid # weak fk(UserSession.id), whose messages can be decrypted by this key
++ senderKeyId: string uuid
++ key: string # symmetric key; encr. by UserSession.publicKey; decr. by UserSession.privateKey
+
+VaultBackupSessionKey
++ id: string uuid pk
++ sessionId: string uuid fk(UserSession.id) # in which session this is stored
++ backedUpSessionId: string uuid fk(UserSession.id) # which session's private key is backed up here
++ backedUpUserId: string uuid fk(User.id) # which user is backed up here
++ key: string # private key of backed up session; encr. by backer's UserSession.publicKey; decr. by backer's UserSession.privateKey
